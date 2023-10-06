@@ -19,11 +19,11 @@ const createNew = async (req, res, next) => {
 const update = async (req, res, next) => {
   const correctCondition = Joi.object({
     boardId: Joi.string().required(),
-    title: Joi.string().required().min(3).max(50).trim().strict()
+    title: Joi.string().min(3).max(50).trim().strict()
   })
 
   try {
-    await correctCondition.validateAsync(req.body, { abortEarly: false })
+    await correctCondition.validateAsync(req.body, { abortEarly: false, allowUnknown: true })
     next()
   } catch (error) {
     next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))

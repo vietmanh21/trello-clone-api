@@ -6,6 +6,7 @@
  */
 
 import { slugify } from '~/utils/formatters'
+import { boardModel } from '~/models/boardModel'
 
 const createNew = async (reqBody) => {
   try {
@@ -15,11 +16,11 @@ const createNew = async (reqBody) => {
       slug: slugify(reqBody.title)
     }
     //Gói tới tầng model để xử lý lưu bản ghi newBoard vaò DB
-
+    const result = await boardModel.createNew(newBoard)
     //Trả kết quả về, trong sẻvice luôn phải có return
-    return newBoard
+    return result
   } catch (error) {
-    throw error
+    throw new Error(error)
   }
 }
 

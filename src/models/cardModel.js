@@ -43,5 +43,5 @@ const update = async(data) => {
 }
 
 export const cardModel = {
-  createNew
+  createNew, update
 }

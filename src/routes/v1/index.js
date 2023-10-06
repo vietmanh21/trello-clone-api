@@ -18,7 +18,7 @@ Router.use('/boards', boardRoute)
 /**
  * COLUMN API
  */
-Router.use('/column', columnRoute)
+Router.use('/columns', columnRoute)
 
 /**
  * CARD API
