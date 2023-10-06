@@ -13,6 +13,7 @@ import { errorHandlingMiddleware } from '~/middlewares/errorHandlingMiddleware'
 
 const START_SERVER = () => {
   const app = express()
+  
   // enable req.body json data
   app.use(express.json())
 
