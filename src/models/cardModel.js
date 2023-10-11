@@ -1,47 +1,58 @@
-import { StatusCodes } from 'http-status-codes'
 import Joi from 'joi'
-import ApiError from '~/utils/ApiError'
 import { GET_DB } from '~/config/mongodb'
+import { ObjectId } from 'mongodb'
+import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 
-const cardCollectionName = 'card'
-const cardCollectionSchema = Joi.object({
+
+// Define Collection (name & schema)
+const CARD_COLLECTION_NAME = 'cards'
+const CARD_COLLECTION_SCHEMA = Joi.object({
+  boardId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+  columnId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+
   title: Joi.string().required().min(3).max(50).trim().strict(),
-  boardId: Joi.string().required(),
-  columnId: Joi.string().required(),
-  cover: Joi.string().default(null),
-  description: Joi.string().default(null),
-  memberId: Joi.array().items(Joi.string()).default([]),
-  createAt: Joi.date().timestamp().default(Date.now()),
-  updateAt: Joi.date().timestamp().default(null),
+  description: Joi.string().optional(),
+
+  createdAt: Joi.date().timestamp('javascript').default(Date.now),
+  updatedAt: Joi.date().timestamp('javascript').default(null),
   _destroy: Joi.boolean().default(false)
-  // sẽ không xoá ngay ko chỉ ko hiện lên cho phía cilent thấy
 })
 
-const validateSchema = async(data) => {
-  await cardCollectionSchema.validateAsync(data, { abortEarly: false })
-}
+// const validateSchema = async(data) => {
+//   await CARD_COLLECTION_NAME.validateAsync(data, { abortEarly: false })
+// }
 
 const createNew = async(data) => {
   try {
-    const validValues = await validateSchema(data)
+    // const validValues = await validateSchema(data)
 
-    const cardCollection = await GET_DB().collection(cardCollectionName).insertOne(validValues)
-    console.log(cardCollection)
+    const insertValues = {
+      ...data,
+      boardId: new ObjectId(data.boardId),
+      columnId: new ObjectId(data.columnId)
+    }
+
+    const cardCollection = await GET_DB().collection(CARD_COLLECTION_NAME).insertOne(insertValues)
+    return cardCollection
   } catch (error) {
-    new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message)
-  } 
-}
-
-const update = async(data) => {
-  try {
-    const validValues = await validateSchema(data)
-
-    const cardCollection = await GET_DB().collection(cardCollectionName).insertOne(validValues)
-  } catch (error) {
-    new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message)
+    throw new Error(error)
   }
 }
 
+// const update = async(data) => {
+//   try {
+//     // const validValues = await validateSchema(data)
+
+//     const cardCollection = await GET_DB().collection(CARD_COLLECTION_NAME).findOneAnhUpdate(
+//       {_id: new ObjectId()})
+//   } catch (error) {
+//     throw new Error(error)
+//   }
+// }
+
 export const cardModel = {
-  createNew, update
+  CARD_COLLECTION_NAME,
+  CARD_COLLECTION_SCHEMA,
+  createNew
+  // update
 }

@@ -4,7 +4,7 @@ import ApiError from '~/utils/ApiError'
 
 const createNew = async (req, res, next) => {
   const correctCondition = Joi.object({
-    title: Joi.string().required().min(3).max(50).trim().strict().messages({
+    title: Joi.string().required().min(3).max(250).trim().strict().messages({
       'any.required': 'Title is required (ManhNguyen)',
       'string.empty': 'Title is not allowed to be empty (ManhNguyen)',
       'string.min': 'Title length must be at least 3 characters long (ManhNguyen)',
@@ -19,7 +19,6 @@ const createNew = async (req, res, next) => {
       'string.trim': 'Description must not have leading or trailing spaces (ManhNguyen)'
     })
   })
-
   try {
     await correctCondition.validateAsync(req.body, { abortEarly: false })
     next()

@@ -16,12 +16,12 @@ const createNew = async (req, res, next) => {
 }
 
 const update = async (req, res, next) => {
-  try {    
+  try {
     const { id } = req.params
     // Điều hướng dữ liệu về phía service
     const updateColumn = await columnService.update(id, req.body)
     // Có kết quả thì trả về phía client
-    res.status(StatusCodes.CREATED).json(updateColumn)
+    res.status(StatusCodes.OK).json(updateColumn)
   } catch (error) {
     next(error)
     // res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

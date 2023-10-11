@@ -18,7 +18,7 @@ const createNew = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   const correctCondition = Joi.object({
-    boardId: Joi.string().required(),
+    boardId: Joi.string(),
     title: Joi.string().min(3).max(50).trim().strict()
   })
 

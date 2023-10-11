@@ -1,35 +1,98 @@
-import { StatusCodes } from 'http-status-codes'
 import Joi from 'joi'
-import ApiError from '~/utils/ApiError'
 import { GET_DB } from '~/config/mongodb'
+import { ObjectId } from 'mongodb'
+import { columnModel } from '~/models/columnModel'
+import { cardModel } from '~/models/cardModel'
+import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 
-const boardCollectionName = 'board'
-const boardCollectionSchema = Joi.object({
+const BOARD_COLLECTION_NAME = 'boards'
+const BOARD_COLLECTION_SCHEMA = Joi.object({
   title: Joi.string().required().min(3).max(50).trim().strict(),
-  columnOrder: Joi.array().items(Joi.string()).default([]),
-  createAt: Joi.date().timestamp().default(Date.now()),
-  updateAt: Joi.date().timestamp().default(null),
+  slug: Joi.string().required().min(3).trim().strict(),
+  description: Joi.string().required().min(3).max(256).trim().strict(),
+
+  // Lưu ý các item trong mảng columnOrderIds là ObjectId nên cần thêm pattern cho chuẩn nhé, (lúc quay video số 57 mình quên nhưng sang đầu video số 58 sẽ có nhắc lại về cái này.)
+  columnOrderIds: Joi.array().items(
+    Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
+  ).default([]),
+
+  createdAt: Joi.date().timestamp('javascript').default(Date.now),
+  updatedAt: Joi.date().timestamp('javascript').default(null),
   _destroy: Joi.boolean().default(false)
-  // sẽ không xoá ngay ko chỉ ko hiện lên cho phía cilent thấy
 })
 
-const validateSchema = async(data) => {
-  await boardCollectionSchema.validateAsync(data, { abortEarly: false })
-}
+// const validateSchema = async(data) =>
+//   await BOARD_COLLECTION_NAME.validateAsync(data, { abortEarly: false })
 
-const createNew = async(data) => {
+
+const createNew = async (data) => {
   try {
-    const validValues = await validateSchema(data)
+    // const validValues = await validateSchema(data)
 
-    const boardCollection = await GET_DB().collection(boardCollectionName).insertOne(validValues)
-    console.log(boardCollection)
-  } catch (error) {
-    new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message)
-  } 
+    const boardCollection = await GET_DB().collection(BOARD_COLLECTION_NAME).insertOne(data)
+
+    return boardCollection
+  } catch (error) { throw new Error(error) }
 }
-  
 
+const findOneById = async (id) => {
+  try {
+    const result = await GET_DB().collection(BOARD_COLLECTION_NAME).findOne({
+      _id: id
+    })
+    return result
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+/**
+ *
+ * @param {String} boardId
+ * @param {String} columnId
+ */
+const pushColumnOrder = async(boardId, columnId) => {
+  try {
+    const boardCollection = await GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(boardId) },
+      { $push: { columnOrder: columnId } },
+      { new: true }
+    )
+    return boardCollection
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+const getBoardById = async(id) => {
+  try {
+    const result = await GET_DB().collection(BOARD_COLLECTION_NAME).aggregate([
+      { $match: { _id: new ObjectId(id) } },
+      { $lookup: {
+        from: columnModel.COLUMN_COLLECTION_NAME,
+        localField: '_id',
+        foreignField: 'boardId',
+        as: 'columns'
+      } },
+      { $lookup: {
+        from: cardModel.CARD_COLLECTION_NAME,
+        localField: 'columns._id',
+        foreignField: 'columnId',
+        as: 'cards'
+      } }
+    ]).toArray()
+    // trả về board duy nhất
+    return result[0] || {}
+  } catch (error) {
+    throw new Error(error)
+  }
+}
 
 export const boardModel = {
-  createNew
+  BOARD_COLLECTION_NAME,
+  BOARD_COLLECTION_SCHEMA,
+  createNew,
+  findOneById,
+  pushColumnOrder,
+  getBoardById
 }

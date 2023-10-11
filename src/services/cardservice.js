@@ -1,17 +1,23 @@
 import { slugify } from '~/utils/formatters'
 import { cardModel } from '~/models/cardModel'
+import { columnModel } from '~/models/columnModel'
 
 const createNew = async (reqBody) => {
   try {
     // xử lý logic dữ liệu
-    const newCard = {
-      ...reqBody,
-      slug: slugify(reqBody.title)
-    }
+    // const newCard = {
+    //   ...reqBody,
+    //   slug: slugify(reqBody.title)
+    // }
     //Gói tới tầng model để xử lý lưu bản ghi newBoard vaò DB
-    const result = await cardModel.createNew(newCard)
+    const newCard = await cardModel.createNew(reqBody)
+
+    await columnModel.pushCardOrder(
+      reqBody.columnId.toString(),
+      newCard.insertedId.toString()
+    )
     //Trả kết quả về, trong service luôn phải có return
-    return result
+    return newCard
   } catch (error) {
     throw new Error(error)
   }
