@@ -1,28 +1,33 @@
-/**
- * Updated by trungquandev.com's author on August 17 2023
- * YouTube: https://youtube.com/@trungquandev
- * "A bit of fragrance clings to the hand that gives flowers!"
- */
-
+import cors from 'cors'
 import express from 'express'
 import exitHook from 'async-exit-hook'
 import { CONNECT_DB, CLOSE_DB } from '~/config/mongodb'
 import { env } from '~/config/environment'
 import { APIs_V1 } from '~/routes/v1/index'
+import { errorHandlingMiddleware } from '~/middlewares/errorHandlingMiddleware'
 
 const START_SERVER = () => {
   const app = express()
+
+  const corsOptions = {
+    origin: 'http://localhost:5173',
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+  }
+
+  app.use(cors(corsOptions))
+
   // enable req.body json data
   app.use(express.json())
 
   // Use APIs V1
   app.use('/v1', APIs_V1)
 
-
+  // middleware xử lý lỗi tập trung
+  app.use(errorHandlingMiddleware)
 
   app.listen(env.APP_PORT, env.APP_HOST, () => {
   // eslint-disable-next-line no-console
-    console.log(`Hello ${ env.AUTHOR}, I am running at ${ env.APP_HOST }:${ env.APP_PORT }/`)
+    console.log(`Hello ${ env.AUTHOR}, I am running at ${ env.APP_HOST }:${ env.APP_PORT }`)
   })
 
   // thuc hien cac tac vu cleanup truoc khi dung server
