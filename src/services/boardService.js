@@ -16,13 +16,11 @@ const createNew = async (reqBody) => {
       slug: slugify(reqBody.title)
     }
     //Gói tới tầng model để xử lý lưu bản ghi newBoard vaò DB
-    const result = await boardModel.createNew(newBoard)
-    console.log(result)
+    const createdBoard = await boardModel.createNew(newBoard)
 
-    const getNewBoard = await boardModel.findOneById(result.insertedId)
-    console.log(getNewBoard)
+    const getNewBoard = await boardModel.findOneById(createdBoard.insertedId)
     //Trả kết quả về, trong sẻvice luôn phải có return
-    return result
+    return getNewBoard
   } catch (error) { throw error }
 }
 
@@ -31,6 +29,10 @@ const getBoardById = async (boardId) => {
     // xử lý logic dữ liệu
     //Gói tới tầng model để xử lý lưu bản ghi newBoard vaò DB
     const board = await boardModel.getBoardById(boardId)
+
+    if (board === undefined) {
+      throw new Error('No board data')
+    }
     //Trả kết quả về, trong sẻvice luôn phải có return
     board.columns.forEach((column) => {
       column.cards = board.cards.filter(c => c.columnId.toString() === column._id.toString())

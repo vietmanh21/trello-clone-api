@@ -21,25 +21,24 @@ const BOARD_COLLECTION_SCHEMA = Joi.object({
   _destroy: Joi.boolean().default(false)
 })
 
-// const validateSchema = async(data) =>
-//   await BOARD_COLLECTION_NAME.validateAsync(data, { abortEarly: false })
+const validateBeforeCreate = async(data) => {
+  return await BOARD_COLLECTION_SCHEMA.validateAsync(data, { abortEarly: false })
+}
 
 
 const createNew = async (data) => {
   try {
-    // const validValues = await validateSchema(data)
+    const validData = await validateBeforeCreate(data)
 
-    const boardCollection = await GET_DB().collection(BOARD_COLLECTION_NAME).insertOne(data)
+    const createdBoard = await GET_DB().collection(BOARD_COLLECTION_NAME).insertOne(validData)
 
-    return boardCollection
+    return createdBoard
   } catch (error) { throw new Error(error) }
 }
 
 const findOneById = async (id) => {
   try {
-    const result = await GET_DB().collection(BOARD_COLLECTION_NAME).findOne({
-      _id: id
-    })
+    const result = await GET_DB().collection(BOARD_COLLECTION_NAME).findOne({ _id: new ObjectId(id) })
     return result
   } catch (error) {
     throw new Error(error)
@@ -55,7 +54,7 @@ const pushColumnOrder = async(boardId, columnId) => {
   try {
     const boardCollection = await GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
       { _id: new ObjectId(boardId) },
-      { $push: { columnOrder: columnId } },
+      { $push: { columnOrderIds: columnId } },
       { new: true }
     )
     return boardCollection
