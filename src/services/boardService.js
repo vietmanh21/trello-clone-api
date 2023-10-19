@@ -7,6 +7,8 @@
 
 import { slugify } from '~/utils/formatters'
 import { boardModel } from '~/models/boardModel'
+import ApiError from '~/utils/ApiError'
+import { StatusCodes } from 'http-status-codes'
 
 const createNew = async (reqBody) => {
   try {
@@ -24,16 +26,13 @@ const createNew = async (reqBody) => {
   } catch (error) { throw error }
 }
 
-const getBoardById = async (boardId) => {
+const getDetails = async (boardId) => {
   try {
-    // xử lý logic dữ liệu
-    //Gói tới tầng model để xử lý lưu bản ghi newBoard vaò DB
-    const board = await boardModel.getBoardById(boardId)
+    const board = await boardModel.getDetails(boardId)
 
-    if (board === undefined) {
-      throw new Error('No board data')
+    if (!board) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Board not found!')
     }
-    //Trả kết quả về, trong sẻvice luôn phải có return
     board.columns.forEach((column) => {
       column.cards = board.cards.filter(c => c.columnId.toString() === column._id.toString())
     })
@@ -46,5 +45,5 @@ const getBoardById = async (boardId) => {
 }
 
 export const boardService = {
-  createNew, getBoardById
+  createNew, getDetails
 }
