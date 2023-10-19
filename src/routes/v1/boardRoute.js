@@ -10,6 +10,6 @@ Router.route('/')
   .post(boardValidation.createNew, boardController.createNew)
 
 Router.route('/:id')
-  .get(boardController.getBoardById)
+  .get(boardController.getDetails)
 
 export const boardRoute = Router

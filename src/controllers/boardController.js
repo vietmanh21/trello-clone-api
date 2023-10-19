@@ -4,9 +4,9 @@ import { boardService } from '~/services/boardService'
 const createNew = async (req, res, next) => {
   try {
     // Điều hướng dữ liệu về phía service
-    const result = await boardService.createNew(req.body)
+    const createdBoard = await boardService.createNew(req.body)
     // Có kết quả thì trả về phía client
-    res.status(StatusCodes.CREATED).json(result)
+    res.status(StatusCodes.CREATED).json(createdBoard)
   } catch (error) {
     next(error)
     // res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -15,21 +15,16 @@ const createNew = async (req, res, next) => {
   }
 }
 
-const getBoardById = async (req, res, next) => {
+const getDetails = async (req, res, next) => {
   try {
-    const { id } = req.params
-    // Điều hướng dữ liệu về phía service
-    const result = await boardService.getBoardById(id)
-    // Có kết quả thì trả về phía client
-    res.status(StatusCodes.CREATED).json(result)
+    const boardId = req.params.id
+    const board = await boardService.getBoardById(boardId)
+    res.status(StatusCodes.CREATED).json(board)
   } catch (error) {
     next(error)
-    // res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-    //   errors: error.message
-    // })
   }
 }
 
 export const boardController = {
-  createNew, getBoardById
+  createNew, getDetails
 }
