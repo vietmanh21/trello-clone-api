@@ -9,9 +9,6 @@ const createNew = async (req, res, next) => {
     res.status(StatusCodes.CREATED).json(createdBoard)
   } catch (error) {
     next(error)
-    // res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-    //   errors: error.message
-    // })
   }
 }
 const update = async (req, res, next) => {

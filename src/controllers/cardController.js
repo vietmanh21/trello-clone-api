@@ -2,16 +2,13 @@ import { StatusCodes } from 'http-status-codes'
 import { cardService } from '~/services/cardService'
 
 const createNew = async (req, res, next) => {
-  try {    
+  try {
     // Điều hướng dữ liệu về phía service
     const createdCard = await cardService.createNew(req.body)
     // Có kết quả thì trả về phía client
     res.status(StatusCodes.CREATED).json(createdCard)
   } catch (error) {
     next(error)
-    // res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-    //   errors: error.message
-    // })
   }
 }
 
@@ -24,9 +21,6 @@ const update = async (req, res, next) => {
     res.status(StatusCodes.OK).json(updateCard)
   } catch (error) {
     next(error)
-    // res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-    //   errors: error.message
-    // })
   }
 }
 
