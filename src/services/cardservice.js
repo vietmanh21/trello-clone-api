@@ -1,4 +1,3 @@
-import { slugify } from '~/utils/formatters'
 import { cardModel } from '~/models/cardModel'
 import { columnModel } from '~/models/columnModel'
 
