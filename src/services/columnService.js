@@ -2,7 +2,7 @@ import { columnModel } from '~/models/columnModel'
 import { boardModel } from '~/models/boardModel'
 import { cardModel } from '~/models/cardModel'
 import { ObjectId } from 'mongodb'
-import { string } from 'joi'
+
 
 const createNew = async (reqBody) => {
   try {
@@ -28,7 +28,7 @@ const update = async (id, reqBody) => {
     const updateColumn = {
       // lấy toàn bộ data
       ...reqBody,
-      updateAt: Date.now()
+      updatedAt: Date.now()
     }
     // cache cards for result
     let cards = []
@@ -37,7 +37,7 @@ const update = async (id, reqBody) => {
       cards = updateColumn.cards
       delete updateColumn.cards
     }
-    //Gói tới tầng model để xử lý lưu bản ghi newBoard vaò DB
+    // Gói tới tầng model để xử lý lưu bản ghi newBoard vaò DB
     const result = await columnModel.update(id, updateColumn)
     await cardModel.updateMany(updateColumn.cardOrder, {
       columnId: new ObjectId(updateColumn._id)

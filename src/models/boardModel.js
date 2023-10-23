@@ -39,6 +39,9 @@ const createNew = async (data) => {
 const update = async(id, data) => {
   try {
     const updateData = { ...data, _id: new ObjectId(id) }
+    if (updateData.boardId) {
+      updateData.boardId = new ObjectId(updateData.boardId)
+    }
     const boardCollection = await GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
       { _id: new ObjectId(id) },
       { $set: updateData },

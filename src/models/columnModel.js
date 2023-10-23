@@ -53,17 +53,19 @@ const pushCardOrder = async(columnId, cardId) => {
   }
 }
 
-const update = async(id, data) => {
+const update = async (id, data) => {
   try {
-    const updateData = { ...data, _id: new ObjectId(id) }
-    const columnCollection = await GET_DB().collection(COLUMN_COLLECTION_NAME).findOneAndUpdate(
+    const updateData = { ...data }
+
+    if (updateData.boardId) updateData.boardId = new ObjectId(updateData.boardId)
+
+    const result = await GET_DB().collection(COLUMN_COLLECTION_NAME).findOneAndUpdate(
       { _id: new ObjectId(id) },
       { $set: updateData },
-      { new: true } // tra về bản ghi mới cho client
+      { new: true }
     )
-    console.log(columnCollection)
-    return columnCollection
 
+    return result
   } catch (error) {
     throw new Error(error)
   }

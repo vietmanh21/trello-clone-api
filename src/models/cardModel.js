@@ -11,16 +11,12 @@ const CARD_COLLECTION_SCHEMA = Joi.object({
   columnId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
 
   title: Joi.string().required().min(3).max(50).trim().strict(),
-  description: Joi.string().optional(),
-
+  cover: Joi.string().default('https://pixabay.com/vi/photos/nh%C3%A0-m%C3%A1y-c%C3%A2y-t%C3%B9ng-b%C3%A1ch-c%C3%A0nh-c%C3%A2y-r%E1%BB%ABng-8297610/'),
   createdAt: Joi.date().timestamp('javascript').default(Date.now),
   updatedAt: Joi.date().timestamp('javascript').default(null),
   _destroy: Joi.boolean().default(false)
 })
 
-const validateSchema = async(data) => {
-  await CARD_COLLECTION_SCHEMA.validateAsync(data, { abortEarly: false })
-}
 const validateBeforeCreate = async(data) => {
   return await CARD_COLLECTION_SCHEMA.validateAsync(data, { abortEarly: false })
 }
@@ -42,16 +38,25 @@ const createNew = async (data) => {
 }
 
 
-// const update = async(data) => {
-//   try {
-//     // const validValues = await validateSchema(data)
+const update = async (id, data) => {
+  try {
+    const updateData = { ...data }
 
-//     const cardCollection = await GET_DB().collection(CARD_COLLECTION_NAME).findOneAnhUpdate(
-//       {_id: new ObjectId()})
-//   } catch (error) {
-//     throw new Error(error)
-//   }
-// }
+    if (updateData.boardId) updateData.boardId = new ObjectId(updateData.boardId)
+
+    if (updateData.columnId) updateData.columnId = new ObjectId(updateData.columnId)
+
+    const result = await GET_DB().collection(CARD_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      { $set: updateData },
+      { new: true }
+    )
+
+    return result
+  } catch (error) {
+    throw new Error(error)
+  }
+}
 
 const updateMany = async (ids, data) => {
   try {
@@ -71,6 +76,6 @@ export const cardModel = {
   CARD_COLLECTION_NAME,
   CARD_COLLECTION_SCHEMA,
   createNew,
-  // update,
+  update,
   updateMany
 }

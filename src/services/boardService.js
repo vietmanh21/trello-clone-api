@@ -28,7 +28,7 @@ const update = async (id, reqBody) => {
     const updateBoard = {
       // lấy toàn bộ data
       ...reqBody,
-      updateAt: Date.now()
+      updatedAt: Date.now()
     }
     
     //Gói tới tầng model để xử lý lưu bản ghi newBoard vaò DB
