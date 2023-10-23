@@ -36,6 +36,24 @@ const createNew = async (data) => {
   } catch (error) { throw new Error(error) }
 }
 
+const update = async(id, data) => {
+  try {
+    const updateData = { ...data, _id: new ObjectId(id) }
+    if (updateData.boardId) {
+      updateData.boardId = new ObjectId(updateData.boardId)
+    }
+    const boardCollection = await GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      { $set: updateData },
+      { new: true } // tra về bản ghi mới cho client
+    )
+    return boardCollection
+
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 const findOneById = async (id) => {
   try {
     const result = await GET_DB().collection(BOARD_COLLECTION_NAME).findOne({ _id: new ObjectId(id) })
@@ -66,7 +84,7 @@ const pushColumnOrder = async(boardId, columnId) => {
 const getDetails = async(id) => {
   try {
     const result = await GET_DB().collection(BOARD_COLLECTION_NAME).aggregate([
-      { $match: { _id: new ObjectId(id) } },
+      { $match: { _id: new ObjectId(id), _destroy: false } },
       { $lookup: {
         from: columnModel.COLUMN_COLLECTION_NAME,
         localField: '_id',
@@ -91,6 +109,7 @@ export const boardModel = {
   BOARD_COLLECTION_NAME,
   BOARD_COLLECTION_SCHEMA,
   createNew,
+  update,
   findOneById,
   pushColumnOrder,
   getDetails
