@@ -18,26 +18,29 @@ const CARD_COLLECTION_SCHEMA = Joi.object({
   _destroy: Joi.boolean().default(false)
 })
 
-// const validateSchema = async(data) => {
-//   await CARD_COLLECTION_NAME.validateAsync(data, { abortEarly: false })
-// }
+const validateSchema = async(data) => {
+  await CARD_COLLECTION_SCHEMA.validateAsync(data, { abortEarly: false })
+}
+const validateBeforeCreate = async(data) => {
+  return await CARD_COLLECTION_SCHEMA.validateAsync(data, { abortEarly: false })
+}
 
-const createNew = async(data) => {
+
+const createNew = async (data) => {
   try {
-    // const validValues = await validateSchema(data)
+    const validData = await validateBeforeCreate(data)
 
     const insertValues = {
-      ...data,
-      boardId: new ObjectId(data.boardId),
-      columnId: new ObjectId(data.columnId)
+      ...validData,
+      columnId: new ObjectId(validData.columnId)
     }
 
-    const cardCollection = await GET_DB().collection(CARD_COLLECTION_NAME).insertOne(insertValues)
-    return cardCollection
-  } catch (error) {
-    throw new Error(error)
-  }
+    const createdCard = await GET_DB().collection(CARD_COLLECTION_NAME).insertOne(insertValues)
+
+    return createdCard
+  } catch (error) { throw new Error(error) }
 }
+
 
 // const update = async(data) => {
 //   try {
@@ -50,9 +53,24 @@ const createNew = async(data) => {
 //   }
 // }
 
+const updateMany = async (ids, data) => {
+  try {
+    const tranformIds = ids.map(i => new ObjectId(i))
+    const cardCollection = await GET_DB().collection(CARD_COLLECTION_NAME).updateMany(
+      { _id: { $in: tranformIds } },
+      { $set: data },
+      { new: true }
+    )
+    return cardCollection
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const cardModel = {
   CARD_COLLECTION_NAME,
   CARD_COLLECTION_SCHEMA,
-  createNew
-  // update
+  createNew,
+  // update,
+  updateMany
 }

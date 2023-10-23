@@ -24,9 +24,6 @@ const update = async (req, res, next) => {
     res.status(StatusCodes.OK).json(updateColumn)
   } catch (error) {
     next(error)
-    // res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-    //   errors: error.message
-    // })
   }
 }
 

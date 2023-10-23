@@ -20,24 +20,24 @@ const COLUMN_COLLECTION_SCHEMA = Joi.object({
   _destroy: Joi.boolean().default(false)
 })
 
-// const validateSchema = async(data) => {
-//   await COLUMN_COLLECTION_NAME.validateAsync(data, { abortEarly: false })
-// }
+const validateBeforeCreate = async(data) => {
+  return await COLUMN_COLLECTION_SCHEMA.validateAsync(data, { abortEarly: false })
+}
 
-const createNew = async(data) => {
+
+const createNew = async (data) => {
   try {
-    // const validValues = await validateSchema(data)
+    const validData = await validateBeforeCreate(data)
 
     const insertValues = {
-      ...data,
-      boardId: new ObjectId(data.boardId)
+      ...validData,
+      boardId: new ObjectId(validData.boardId)
     }
 
-    const columnCollection = await GET_DB().collection(COLUMN_COLLECTION_NAME).insertOne(insertValues)
-    return columnCollection
-  } catch (error) {
-    throw new Error(error)
-  }
+    const createdColumn = await GET_DB().collection(COLUMN_COLLECTION_NAME).insertOne(insertValues)
+
+    return createdColumn
+  } catch (error) { throw new Error(error) }
 }
 
 const pushCardOrder = async(columnId, cardId) => {
@@ -55,9 +55,10 @@ const pushCardOrder = async(columnId, cardId) => {
 
 const update = async(id, data) => {
   try {
+    const updateData = { ...data, _id: new ObjectId(id) }
     const columnCollection = await GET_DB().collection(COLUMN_COLLECTION_NAME).findOneAndUpdate(
       { _id: new ObjectId(id) },
-      { $set: data },
+      { $set: updateData },
       { new: true } // tra về bản ghi mới cho client
     )
     console.log(columnCollection)

@@ -14,11 +14,22 @@ const createNew = async (req, res, next) => {
     // })
   }
 }
+const update = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    // Điều hướng dữ liệu về phía service
+    const updateBoard = await boardService.update(id, req.body)
+    // Có kết quả thì trả về phía client
+    res.status(StatusCodes.OK).json(updateBoard)
+  } catch (error) {
+    next(error)
+  }
+}
 
 const getDetails = async (req, res, next) => {
   try {
     const boardId = req.params.id
-    const board = await boardService.getBoardById(boardId)
+    const board = await boardService.getDetails(boardId)
     res.status(StatusCodes.CREATED).json(board)
   } catch (error) {
     next(error)
@@ -26,5 +37,7 @@ const getDetails = async (req, res, next) => {
 }
 
 export const boardController = {
-  createNew, getDetails
+  createNew,
+  update,
+  getDetails
 }
